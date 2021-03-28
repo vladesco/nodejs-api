@@ -1,0 +1,24 @@
+{
+    "env": {
+      "es6": true
+    },
+    "rules": {
+      "no-var": "error",
+      "quotes": [2, "single", { "avoidEscape": true }],
+      "max-len": [2, 80, 4, {"ignoreUrls": true}],
+      "semi": "error",
+      "indent": "error",
+      "no-multi-spaces": "error",
+      "space-in-parens": "error",
+      "no-multiple-empty-lines": "error",
+      "prefer-const": "error",
+      "no-use-before-define": "error"
+    },
+    "parserOptions": {
+        "sourceType": "module"
+    } ,
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ]
+  }
