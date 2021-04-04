@@ -25,12 +25,8 @@ export class UserMapper {
         updater: (user: UserDatabasePresentation) => UserDatabasePresentation
     ): Promise<UserDatabasePresentation[]> {
         const selectedUsers = await this.getUsers(condition);
-        if (selectedUsers.length) {
-            selectedUsers.forEach((user) => Object.assign(user, updater(user)));
-        } else {
-            throw new Error('no users does not found');
-        }
 
+        selectedUsers.forEach((user) => Object.assign(user, updater(user)));
         return selectedUsers;
     }
 }
