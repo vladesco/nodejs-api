@@ -1,61 +1,83 @@
 import { NextFunction, Request, Response, Router } from 'express';
-import { BaseHttpError, HttpStatusCode } from '../../errors';
-import { UserMapper } from '../../mappers';
-import { UserRepository } from '../../repositories';
+import { BaseHttpError } from '../../errors';
 import { UserService } from '../../serivces';
 
 export const userController = Router();
 
-const userService = new UserService(new UserRepository(new UserMapper()));
+export class UserControllerRrovider {
+    constructor(private userService: UserService) {}
 
-userController.get('/users', async (req: Request, res: Response) => {
-    const users = await userService.getUsers();
-    res.json(users);
-    res.end();
-});
+    public provideController(): Router {
+        const controller = Router();
 
-userController.post('/users', async (req: Request, res: Response) => {
-    const userDTO = req.body;
-    const addedUser = await userService.addUser(userDTO);
-    res.json(addedUser);
-    res.end();
-});
+        controller.get('/users', this.getUsers);
+        controller.post('/users', this.addUser);
+        controller.get('/users/list', this.getUserList);
+        controller.get('/users/:id', this.getUserById);
+        controller.delete('/users/:id', this.deleteUserById);
+        controller.put('/users/:id', this.updateUserById);
+        controller.use(this.handleError);
 
-userController.get('/users/list', async (req: Request, res: Response) => {
-    const subString = req.query.subString as string;
-    const limit = Number(req.query.limit);
-    const users = await userService.getAutoSuggestUsers(subString, limit);
+        return controller;
+    }
 
-    res.json(users);
-});
+    private getUsers = async (req: Request, res: Response) => {
+        const users = await this.userService.getUsers();
+        res.json(users);
+        res.end();
+    };
 
-userController.get('/users/:id', async (req: Request, res: Response) => {
-    const userId = req.params.id;
-    const findedUser = await userService.getUserById(userId);
-    res.json(findedUser);
-});
+    private addUser = async (req: Request, res: Response) => {
+        const userDTO = req.body;
+        const addedUser = await this.userService.addUser(userDTO);
+        res.json(addedUser);
+        res.end();
+    };
 
-userController.delete('/users/:id', async (req: Request, res: Response) => {
-    const userId = req.params.id;
-    const findedUser = await userService.deletedUserById(userId);
-    res.json(findedUser);
-});
+    private getUserList = async (req: Request, res: Response) => {
+        const subString = req.query.subString as string;
+        const limit = Number(req.query.limit);
+        const users = await this.userService.getAutoSuggestUsers(
+            subString,
+            limit
+        );
 
-userController.put('/users/:id', async (req: Request, res: Response) => {
-    const userId = req.params.id;
-    const userDTO = req.body;
-    const updatedUser = await userService.updateUserById(userId, userDTO);
-    res.json(updatedUser);
-});
+        res.json(users);
+    };
 
-userController.use(
-    (error: Error, req: Request, res: Response, next: NextFunction) => {
+    private getUserById = async (req: Request, res: Response) => {
+        const userId = req.params.id;
+        const findedUser = await this.userService.getUserById(userId);
+        res.json(findedUser);
+    };
+
+    private deleteUserById = async (req: Request, res: Response) => {
+        const userId = req.params.id;
+        const findedUser = await this.userService.deletedUserById(userId);
+        res.json(findedUser);
+    };
+
+    private updateUserById = async (req: Request, res: Response) => {
+        const userId = req.params.id;
+        const userDTO = req.body;
+        const updatedUser = await this.userService.updateUserById(
+            userId,
+            userDTO
+        );
+        res.json(updatedUser);
+    };
+
+    private handleError = (
+        error: Error,
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
         if (error instanceof BaseHttpError) {
             res.status(error.errorCode);
             res.send(error.getMessage());
         } else {
-            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR);
-            res.send(error.message);
+            throw error;
         }
-    }
-);
+    };
+}

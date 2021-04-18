@@ -1,6 +1,6 @@
 import Joi from 'joi';
-import { ValidationSchema } from './types';
-import { UserDTO } from '../models';
+import { UserDTO } from '../types';
+import { ValidationSchema } from '../types';
 
 const userDTOSchema: ValidationSchema<UserDTO> = {
     login: Joi.string().min(5).max(20).required(),

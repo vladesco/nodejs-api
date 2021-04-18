@@ -1,15 +1,11 @@
-import express, { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
-import { HttpStatusCode } from './errors';
-import { userController } from './routes/controllers';
+import { getConfig } from './config';
+import { setupExpress, setupSequelize } from './loaders';
+import { Config } from './types';
 
-export const app = express();
+export const bootstrapApp = async () => {
+    const { dbConnectionString, port }: Config = getConfig();
 
-app.use(express.json());
-
-app.use('/', userController);
-
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR);
-    res.send(err.message);
-});
+    await setupSequelize(dbConnectionString);
+    await setupExpress(port);
+};
