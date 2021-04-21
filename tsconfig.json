@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2016",
+    "module": "commonjs",                 
+    "strict": true,                           
+    "noImplicitAny": true,                 
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "types": ["./app/types/"]
+  } 
+}
