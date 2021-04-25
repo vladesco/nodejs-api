@@ -1,5 +1,3 @@
-import { app } from './app';
+import { bootstrapApp } from './app';
 
-const PORT = 8080;
-
-app.listen(PORT, () => console.log(`server listens ${PORT} port`));
+bootstrapApp();

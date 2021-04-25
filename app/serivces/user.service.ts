@@ -1,40 +1,36 @@
 import { v4 } from 'uuid';
+import { PostgreDataAccess } from '../data-access';
 import { NotFoundError, ValidationError } from '../errors';
-import { UserDTO } from '../models';
-import { UserInfo, UserRepository } from '../repositories';
+import { UserDTO, WithId } from '../types';
 import { userDTOValidtor } from '../validation';
 
 export class UserService {
-    constructor(private userRepository: UserRepository) {}
+    constructor(
+        private userAccessService: PostgreDataAccess<WithId<UserDTO>>
+    ) {}
 
-    public async addUser(userDTO: UserDTO): Promise<UserInfo> {
+    public async addUser(userDTO: UserDTO): Promise<WithId<UserDTO>> {
         const { error } = userDTOValidtor.validate(userDTO);
 
         if (error) {
             throw new ValidationError(error.message);
         }
 
-        const isLoginNotUnique = await this.userRepository.getUserByLogin(
-            userDTO.login
-        );
-
-        if (isLoginNotUnique) {
-            throw new ValidationError(
-                'there is any user with the same login. Login must be unique'
-            );
-        }
-
         const userInfo = this.generateUserInfo(userDTO);
 
-        return this.userRepository.addUser(userInfo);
+        try {
+            return this.userAccessService.create(userInfo);
+        } catch (error) {
+            throw new ValidationError(error.message);
+        }
     }
 
-    public async getUsers(): Promise<UserInfo[]> {
-        return this.userRepository.getUsers();
+    public async getUsers(): Promise<WithId<UserDTO>[]> {
+        return this.userAccessService.get();
     }
 
-    public async getUserById(userId: string): Promise<UserInfo> {
-        const user = await this.userRepository.getUserById(userId);
+    public async getUserById(userId: string): Promise<WithId<UserDTO>> {
+        const user = await this.userAccessService.getByPK(userId);
 
         if (!user) {
             throw new NotFoundError('user with this id does not exist');
@@ -43,10 +39,8 @@ export class UserService {
         return user;
     }
 
-    public async deletedUserById(
-        userId: string
-    ): Promise<UserInfo | undefined> {
-        const deletedUser = await this.userRepository.deletedUserById(userId);
+    public async deletedUserById(userId: string): Promise<WithId<UserDTO>> {
+        const deletedUser = await this.userAccessService.deleteByPK(userId);
 
         if (!deletedUser) {
             throw new NotFoundError('user with this id does not exist');
@@ -57,14 +51,14 @@ export class UserService {
     public async updateUserById(
         userId: string,
         userDTO: UserDTO
-    ): Promise<UserInfo> {
+    ): Promise<WithId<UserDTO>> {
         const { error } = userDTOValidtor.validate(userDTO);
 
         if (error) {
             throw new ValidationError(error.message);
         }
 
-        const updatedUser = await this.userRepository.updateUserById(
+        const updatedUser = await this.userAccessService.updateByPK(
             userId,
             userDTO
         );
@@ -83,10 +77,14 @@ export class UserService {
             );
         }
 
-        return this.userRepository.getAutoSuggestUsers(subString, limit);
+        return this.userAccessService.getByField(
+            'login',
+            subString,
+            Number(limit)
+        );
     }
 
-    private generateUserInfo(user: UserDTO): UserInfo {
+    private generateUserInfo(user: UserDTO): WithId<UserDTO> {
         return { ...user, id: v4() };
     }
 }
