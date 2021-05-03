@@ -1,5 +1,6 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 import { UserDTO, WithId } from '../types';
+import { BaseModel } from './base.model';
 
 const userSchema = {
     id: {
@@ -17,8 +18,8 @@ const userSchema = {
     },
 };
 
-export class UserModel extends Model<WithId<UserDTO>> {
-    public id!: number;
+export class UserModel extends BaseModel<WithId<UserDTO>> {
+    public id!: string;
     public login!: string;
     public age!: number;
     public password!: string;
