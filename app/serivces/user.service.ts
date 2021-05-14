@@ -1,13 +1,10 @@
 import { v4 } from 'uuid';
-import { PostgreDataAccess } from '../data-access';
 import { NotFoundError, ValidationError } from '../errors';
-import { UserDTO, WithId } from '../types';
+import { DataAccess, UserDTO, WithId } from '../types';
 import { userDTOValidtor } from '../validation';
 
 export class UserService {
-    constructor(
-        private userAccessService: PostgreDataAccess<WithId<UserDTO>>
-    ) {}
+    constructor(private userAccessService: DataAccess<WithId<UserDTO>>) {}
 
     public async addUser(userDTO: UserDTO): Promise<WithId<UserDTO>> {
         const { error } = userDTOValidtor.validate(userDTO);
@@ -18,11 +15,7 @@ export class UserService {
 
         const userInfo = this.generateUserInfo(userDTO);
 
-        try {
-            return this.userAccessService.create(userInfo);
-        } catch (error) {
-            throw new ValidationError(error.message);
-        }
+        return this.userAccessService.create(userInfo);
     }
 
     public async getUsers(): Promise<WithId<UserDTO>[]> {

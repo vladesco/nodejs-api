@@ -1,8 +1,5 @@
-import { NextFunction, Request, Response, Router } from 'express';
-import { BaseHttpError } from '../../errors';
+import { Request, Response, Router } from 'express';
 import { UserService } from '../../serivces';
-
-export const userController = Router();
 
 export class UserControllerRrovider {
     constructor(private userService: UserService) {}
@@ -16,7 +13,6 @@ export class UserControllerRrovider {
         controller.get('/users/:id', this.getUserById);
         controller.delete('/users/:id', this.deleteUserById);
         controller.put('/users/:id', this.updateUserById);
-        controller.use(this.handleError);
 
         return controller;
     }
@@ -24,14 +20,12 @@ export class UserControllerRrovider {
     private getUsers = async (req: Request, res: Response) => {
         const users = await this.userService.getUsers();
         res.json(users);
-        res.end();
     };
 
     private addUser = async (req: Request, res: Response) => {
         const userDTO = req.body;
         const addedUser = await this.userService.addUser(userDTO);
         res.json(addedUser);
-        res.end();
     };
 
     private getUserList = async (req: Request, res: Response) => {
@@ -65,19 +59,5 @@ export class UserControllerRrovider {
             userDTO
         );
         res.json(updatedUser);
-    };
-
-    private handleError = (
-        error: Error,
-        req: Request,
-        res: Response,
-        next: NextFunction
-    ) => {
-        if (error instanceof BaseHttpError) {
-            res.status(error.errorCode);
-            res.send(error.getMessage());
-        } else {
-            throw error;
-        }
     };
 }

@@ -1,5 +1,11 @@
 import { Sequelize } from 'sequelize';
-import { initializeUserModel } from '../models';
+import {
+    initializeGroupModel,
+    initializeGroupPermissionModel,
+    initializePermissionModel,
+    initializeUserGroupModel,
+    initializeUserModel,
+} from '../models';
 
 export const setupSequelize = async (dbConnectionString: string) => {
     const sequelize = new Sequelize(dbConnectionString);
@@ -7,9 +13,14 @@ export const setupSequelize = async (dbConnectionString: string) => {
 
     try {
         await sequelize.authenticate();
+        await sequelize.sync({ force: true });
     } catch {
         process.exit(1);
     }
 
     initializeUserModel(sequelize);
+    initializeGroupModel(sequelize);
+    initializePermissionModel(sequelize);
+    initializeGroupPermissionModel(sequelize);
+    initializeUserGroupModel(sequelize);
 };
