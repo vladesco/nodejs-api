@@ -5,8 +5,10 @@
         "strict": true,
         "noImplicitAny": true,
         "strictNullChecks": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
         "noUnusedLocals": true,
         "esModuleInterop": true,
-        "types": ["sequelize/types"]
+        "types": ["sequelize/types", "./app/types/global.d.ts"]
     }
 }

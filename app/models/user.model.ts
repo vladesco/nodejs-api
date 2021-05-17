@@ -1,5 +1,6 @@
 import { DataTypes, Sequelize } from 'sequelize';
-import { UserDTO, WithId } from '../types';
+import { UserDTO } from './types';
+import { WithId } from '../types';
 import { BaseModel } from './base.model';
 
 const userSchema = {

@@ -1,11 +1,12 @@
 import 'express-async-errors';
 import { getConfig } from './config';
-import { setupExpress, setupSequelize } from './loaders';
-import { Config } from './types';
+import { setupDI, setupErrorHandling, setupExpress, setupSequelize } from './loaders';
 
 export const bootstrapApp = async () => {
-    const { dbConnectionString, port }: Config = getConfig();
+    const config = getConfig();
 
-    await setupSequelize(dbConnectionString);
-    await setupExpress(port);
+    await setupDI(config);
+    await setupErrorHandling(config);
+    await setupSequelize(config);
+    await setupExpress(config);
 };

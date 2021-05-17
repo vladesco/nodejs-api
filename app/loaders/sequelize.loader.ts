@@ -1,4 +1,5 @@
 import { Sequelize } from 'sequelize';
+import { Config } from '../config';
 import {
     initializeGroupModel,
     initializeGroupPermissionModel,
@@ -7,7 +8,7 @@ import {
     initializeUserModel,
 } from '../models';
 
-export const setupSequelize = async (dbConnectionString: string) => {
+export const setupSequelize = async ({ dbConnectionString }: Config) => {
     const sequelize = new Sequelize(dbConnectionString);
     process.on('exit', () => sequelize.close());
 
