@@ -1,12 +1,12 @@
-import { Config } from '../config';
+import { Config, getConfig } from '../config';
 import { PostgreManyToMany, PostgreSingle } from '../data-access';
 import {
+    configToken,
     container,
-    groupAccessServiceToken,
-    linkingUserAndGroupAccessServiceToken,
+    groupAccessObjectToken,
     loggerToken,
-    userAccessServiceToken,
-    userGroupAccessServiceToken,
+    userAccessObjectToken,
+    userGroupAccessObjectToken,
 } from '../di';
 import { getCustomLogger } from '../logger/custom';
 import { getWinstonLogger } from '../logger/winston';
@@ -17,28 +17,24 @@ import {
     UserDTO,
     UserModel,
     UserWithGroupsDTO,
-    UserGroupDTO,
-    UserGroupModel,
 } from '../models';
 import { PropertyType, WithId } from '../types';
 
-export const setupDI = async ({ logger }: Config) => {
-    container.provide(loggerToken, getLogger(logger));
-    container.provide(userAccessServiceToken, new PostgreSingle<WithId<UserDTO>>(UserModel));
+export const setupDI = async () => {
+    const config = getConfig();
+
+    container.provide(configToken, config);
+    container.provide(loggerToken, getLogger(config.logger));
+    container.provide(userAccessObjectToken, new PostgreSingle<WithId<UserDTO>>(UserModel));
 
     container.provide(
-        groupAccessServiceToken,
+        groupAccessObjectToken,
         new PostgreManyToMany<WithId<GroupWithPermissionsDTO>>(GroupModel, PermissionModel)
     );
 
     container.provide(
-        userGroupAccessServiceToken,
+        userGroupAccessObjectToken,
         new PostgreManyToMany<UserWithGroupsDTO>(UserModel, GroupModel)
-    );
-
-    container.provide(
-        linkingUserAndGroupAccessServiceToken,
-        new PostgreSingle<UserGroupDTO>(UserGroupModel)
     );
 };
 

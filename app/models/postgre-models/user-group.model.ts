@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import { BaseModel } from './base.model';
+import { BaseModel } from './base.models';
 import { GroupModel } from './group.model';
 import { UserModel } from './user.model';
 

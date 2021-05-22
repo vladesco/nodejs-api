@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS Permissions CASCADE;
 DROP TABLE IF EXISTS Users CASCADE;
 DROP TABLE IF EXISTS GroupPermissions CASCADE;
 DROP TABLE IF EXISTS UserGroups CASCADE;
+DROP TABLE IF EXISTS AuthUsers CASCADE;
 
 CREATE TABLE Users
 (
@@ -18,7 +19,7 @@ CREATE TABLE Permissions(
 
 CREATE TABLE Groups(
     id UUID PRIMARY KEY,
-    name VARCHAR(50) NOT NULL
+    name VARCHAR(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE GroupPermissions(
@@ -31,6 +32,12 @@ CREATE TABLE UserGroups(
     group_id UUID REFERENCES Groups(id) ON DELETE CASCADE,
     user_id UUID REFERENCES Users(id) ON DELETE CASCADE,
     PRIMARY KEY(group_id, user_id)
+);
+
+CREATE TABLE AuthUsers(
+    auth_id UUID PRIMARY KEY,
+    user_id UUID REFERENCES Users(id) ON DELETE CASCADE,
+    token VARCHAR(100)
 );
 
 INSERT INTO Users (id, login, password, age) 

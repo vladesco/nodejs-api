@@ -1,7 +1,7 @@
 import { DataTypes, Sequelize } from 'sequelize';
-import { UserDTO } from './types';
-import { WithId } from '../types';
-import { BaseModel } from './base.model';
+import { UserDTO } from '../types';
+import { WithId } from '../../types';
+import { ManyToManyModel } from './base.models';
 
 const userSchema = {
     id: {
@@ -19,7 +19,7 @@ const userSchema = {
     },
 };
 
-export class UserModel extends BaseModel<WithId<UserDTO>> {
+export class UserModel extends ManyToManyModel<WithId<UserDTO>> {
     public id!: string;
     public login!: string;
     public age!: number;

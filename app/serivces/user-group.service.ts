@@ -1,37 +1,27 @@
-import { DataAccess } from '../data-access';
+import { UserGroupDataService } from '../data-access';
 import { PerformanceLogger } from '../decorators';
-import {
-    Inject,
-    Injectable,
-    linkingUserAndGroupAccessServiceToken,
-    userGroupAccessServiceToken,
-} from '../di';
+import { Injectable } from '../di';
 import { ValidationError } from '../errors';
 import { LoggerLevel } from '../logger';
-import { UserWithGroupsDTO, UserGroupDTO, UsersGroupDTO } from '../models';
+import { UserWithGroupsDTO, UsersGroupDTO } from '../models';
 import { usersGroupDTOValidtor } from '../validation';
 
 @Injectable()
 export class UserGroupService {
-    constructor(
-        @Inject(userGroupAccessServiceToken)
-        private userGroupAccessService: DataAccess<UserWithGroupsDTO>,
-        @Inject(linkingUserAndGroupAccessServiceToken)
-        private linkingUserAndGroupAccessService: DataAccess<UserGroupDTO>
-    ) {}
+    constructor(private userGroupAccessService: UserGroupDataService) {}
 
     @PerformanceLogger(LoggerLevel.INFO)
-    public async getUserGroupsByPk(primaryKey: string): Promise<UserWithGroupsDTO> {
-        return this.userGroupAccessService.getByPK(primaryKey);
+    public async getUserWithGroupsByPk(primaryKey: string): Promise<UserWithGroupsDTO> {
+        return this.userGroupAccessService.getUserWithGroupsByPk(primaryKey);
     }
 
     @PerformanceLogger(LoggerLevel.INFO)
     public async getUsersWithGroups(): Promise<UserWithGroupsDTO[]> {
-        return this.userGroupAccessService.get();
+        return this.userGroupAccessService.getUsersWithGroups();
     }
 
     @PerformanceLogger(LoggerLevel.INFO)
-    public async linkUsersAndGroup(usersGroupDTO: UsersGroupDTO): Promise<UserWithGroupsDTO[]> {
+    public async adaddUsersToGroup(usersGroupDTO: UsersGroupDTO): Promise<UserWithGroupsDTO[]> {
         const { error } = usersGroupDTOValidtor.validate(usersGroupDTO);
 
         if (error) {
@@ -40,19 +30,6 @@ export class UserGroupService {
 
         const { userIds, groupId } = usersGroupDTO;
 
-        await Promise.all(
-            userIds.map(async (userId) => {
-                await this.linkingUserAndGroupAccessService.create({
-                    userId,
-                    groupId,
-                });
-            })
-        );
-
-        return Promise.all(
-            userIds.map((userId) => {
-                return this.userGroupAccessService.getByPK(userId);
-            })
-        );
+        return this.userGroupAccessService.addUsersToGroup(userIds, groupId);
     }
 }

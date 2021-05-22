@@ -1,6 +1,6 @@
 import express, { NextFunction, Response, Request } from 'express';
 import { Config } from '../config';
-import { container, loggerToken } from '../di';
+import { configToken, container, loggerToken } from '../di';
 
 import { HttpStatusCode } from '../errors';
 import { LoggerMap } from '../logger';
@@ -10,10 +10,12 @@ import {
     UserGroupControllerProvider,
 } from '../routes/controllers';
 
-export const setupExpress = async ({ port }: Config) => {
+export const setupExpress = async () => {
     const app = express();
 
+    const { port } = container.resolve<Config>(configToken);
     const logger = container.resolve<LoggerMap>(loggerToken);
+
     const userControllerProvider = container.resolve(UserControllerRrovider);
     const groupControllerProvider = container.resolve(GroupControllerRrovider);
     const userGroupContollerProvider = container.resolve(UserGroupControllerProvider);

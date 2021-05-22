@@ -1,8 +1,7 @@
-import { Config } from '../config';
 import { container, loggerToken } from '../di';
 import { LoggerMap } from '../logger';
 
-export const setupErrorHandling = async (config: Config) => {
+export const setupErrorHandling = async () => {
     const logger = container.resolve<LoggerMap>(loggerToken);
 
     process.on('uncaughtException', (error) => {

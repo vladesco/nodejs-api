@@ -11,7 +11,7 @@ export class ValidationError extends BaseHttpError {
     }
 
     public getMessage(): string {
-        return `[validation error]: ${this.message}`;
+        return `[Validation]: ${this.message}`;
     }
 }
 
@@ -20,6 +20,16 @@ export class NotFoundError extends BaseHttpError {
         return HttpStatusCode.NOT_FOUND;
     }
     public getMessage(): string {
-        return `[No Found Error error]: ${this.message}`;
+        return `[Not Found]: ${this.message}`;
+    }
+}
+
+export class ForbiddenError extends BaseHttpError {
+    get errorCode() {
+        return HttpStatusCode.FORBIDDEN;
+    }
+
+    public getMessage(): string {
+        return `[Forbidden]: ${this.message}`;
     }
 }

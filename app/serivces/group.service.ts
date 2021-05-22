@@ -1,7 +1,7 @@
 import { v4 } from 'uuid';
-import { DataAccess } from '../data-access';
+import { GroupDataAccess } from '../data-access';
 import { PerformanceLogger } from '../decorators';
-import { groupAccessServiceToken, Inject, Injectable } from '../di';
+import { Injectable } from '../di';
 import { NotFoundError, ValidationError } from '../errors';
 import { LoggerLevel } from '../logger';
 import { GroupWithPermissionsDTO } from '../models';
@@ -10,19 +10,16 @@ import { groupWithPermissionsDTOValidtor } from '../validation';
 
 @Injectable()
 export class GroupService {
-    constructor(
-        @Inject(groupAccessServiceToken)
-        private groupAccessService: DataAccess<WithId<GroupWithPermissionsDTO>>
-    ) {}
+    constructor(private groupAccessService: GroupDataAccess) {}
 
     @PerformanceLogger(LoggerLevel.DEBUG)
     public async getGroups(): Promise<WithId<GroupWithPermissionsDTO>[]> {
-        return this.groupAccessService.get();
+        return this.groupAccessService.getGroups();
     }
 
     @PerformanceLogger(LoggerLevel.DEBUG)
     public async getGroupById(groupId: string): Promise<WithId<GroupWithPermissionsDTO>> {
-        const findedGroup = await this.groupAccessService.getByPK(groupId);
+        const findedGroup = await this.groupAccessService.getGroupById(groupId);
 
         if (!findedGroup) {
             throw new NotFoundError(`group with id ${groupId} does not exist`);
@@ -32,7 +29,7 @@ export class GroupService {
 
     @PerformanceLogger(LoggerLevel.DEBUG)
     public async deleteGroupById(groupId: string): Promise<WithId<GroupWithPermissionsDTO>> {
-        const deletedGroup = await this.groupAccessService.deleteByPK(groupId);
+        const deletedGroup = await this.groupAccessService.deleteGroupById(groupId);
 
         if (!deletedGroup) {
             throw new NotFoundError(`group with id ${groupId} does not exist`);
@@ -52,7 +49,7 @@ export class GroupService {
 
         const groupInfo = this.generateGroupInfo(groupDTO);
 
-        return this.groupAccessService.create(groupInfo);
+        return this.groupAccessService.createGroup(groupInfo);
     }
 
     @PerformanceLogger(LoggerLevel.DEBUG)
@@ -66,7 +63,7 @@ export class GroupService {
             throw new ValidationError(error.message);
         }
 
-        const updatedGroup = await this.groupAccessService.updateByPK(groupId, groupDTO);
+        const updatedGroup = await this.groupAccessService.updateGroupById(groupId, groupDTO);
 
         if (!updatedGroup) {
             throw new NotFoundError(`group with id ${groupId} does not exist`);

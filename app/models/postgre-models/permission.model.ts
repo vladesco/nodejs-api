@@ -1,6 +1,6 @@
 import { DataTypes, Sequelize } from 'sequelize';
-import { Permission } from './types';
-import { BaseModel } from './base.model';
+import { Permission } from '../types';
+import { ManyToManyModel } from './base.models';
 
 const permissionSchema = {
     name: {
@@ -9,7 +9,7 @@ const permissionSchema = {
     },
 };
 
-export class PermissionModel extends BaseModel<{ name: Permission }> {
+export class PermissionModel extends ManyToManyModel<{ name: Permission }> {
     public name!: Permission;
 }
 

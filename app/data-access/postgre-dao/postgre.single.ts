@@ -1,7 +1,8 @@
 import { Op } from 'sequelize';
-import { BaseModel } from '../models';
-import { AnyObject, StaticMethods } from '../types';
-import { DataAccess } from './types';
+import { DataAccess, SearchOptions } from '..';
+import { BaseModel } from '../../models';
+import { AnyObject, StaticMethods } from '../../types';
+import { transformFields } from '../../utils';
 
 export class PostgreSingle<T extends AnyObject = {}> implements DataAccess<T> {
     constructor(private model: StaticMethods<typeof BaseModel>) {}
@@ -34,18 +35,17 @@ export class PostgreSingle<T extends AnyObject = {}> implements DataAccess<T> {
         return updatedRow as T;
     }
 
-    public async getByField(
-        field: string,
-        substring: string,
-        limit: number
+    public async getByFields(
+        searchQuery: AnyObject,
+        { limit, exact }: Partial<SearchOptions>
     ): Promise<T[]> {
+        const query = exact
+            ? searchQuery
+            : transformFields(searchQuery, (value) => ({ [Op.substring]: value }));
+
         return this.model.findAll({
             limit,
-            where: {
-                [field]: {
-                    [Op.substring]: substring,
-                },
-            },
+            where: query,
         }) as Promise<T[]>;
     }
 }

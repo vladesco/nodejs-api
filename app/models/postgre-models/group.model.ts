@@ -1,5 +1,5 @@
 import { DataTypes, Sequelize } from 'sequelize';
-import { BaseModel } from './base.model';
+import { ManyToManyModel } from './base.models';
 
 const groupSchema = {
     id: {
@@ -12,7 +12,7 @@ const groupSchema = {
     },
 };
 
-export class GroupModel extends BaseModel<{ id: string; name: string }> {
+export class GroupModel extends ManyToManyModel<{ id: string; name: string }> {
     public id!: number;
     public name!: string;
 }

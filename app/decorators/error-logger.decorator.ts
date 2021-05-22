@@ -9,16 +9,9 @@ export const ErrorLogger = (level: LoggerLevel) => {
         descriptor.value = function (...args: any[]) {
             const logger = container.resolve<LoggerMap>(loggerToken)[level];
             const functionName = nativeMethod.name;
-            const functionArguments = args;
 
             const logError = (error: Error) =>
-                logger(
-                    functionName,
-                    'was called with arguments',
-                    functionArguments,
-                    'error occured:',
-                    error.message
-                );
+                logger(functionName, 'error occured:', error.message);
 
             try {
                 const methodResult = nativeMethod.apply(this, args);

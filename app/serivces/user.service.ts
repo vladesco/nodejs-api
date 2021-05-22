@@ -1,7 +1,7 @@
 import { v4 } from 'uuid';
-import { DataAccess } from '../data-access';
+import { UserDataAccess } from '../data-access';
 import { PerformanceLogger } from '../decorators';
-import { Inject, Injectable, userAccessServiceToken } from '../di';
+import { Injectable } from '../di';
 import { NotFoundError, ValidationError } from '../errors';
 import { LoggerLevel } from '../logger';
 import { UserDTO } from '../models';
@@ -10,10 +10,7 @@ import { userDTOValidtor } from '../validation';
 
 @Injectable()
 export class UserService {
-    constructor(
-        @Inject(userAccessServiceToken)
-        private userAccessService: DataAccess<WithId<UserDTO>>
-    ) {}
+    constructor(private userDataAccess: UserDataAccess) {}
 
     @PerformanceLogger(LoggerLevel.DEBUG)
     public async addUser(userDTO: UserDTO): Promise<WithId<UserDTO>> {
@@ -25,17 +22,17 @@ export class UserService {
 
         const userInfo = this.generateUserInfo(userDTO);
 
-        return this.userAccessService.create(userInfo);
+        return this.userDataAccess.addUser(userInfo);
     }
 
     @PerformanceLogger(LoggerLevel.DEBUG)
     public async getUsers(): Promise<WithId<UserDTO>[]> {
-        return this.userAccessService.get();
+        return this.userDataAccess.getUsers();
     }
 
     @PerformanceLogger(LoggerLevel.DEBUG)
     public async getUserById(userId: string): Promise<WithId<UserDTO>> {
-        const user = await this.userAccessService.getByPK(userId);
+        const user = await this.userDataAccess.getUserById(userId);
 
         if (!user) {
             throw new NotFoundError('user with this id does not exist');
@@ -46,7 +43,7 @@ export class UserService {
 
     @PerformanceLogger(LoggerLevel.DEBUG)
     public async deletedUserById(userId: string): Promise<WithId<UserDTO>> {
-        const deletedUser = await this.userAccessService.deleteByPK(userId);
+        const deletedUser = await this.userDataAccess.deletedUserById(userId);
 
         if (!deletedUser) {
             throw new NotFoundError('user with this id does not exist');
@@ -62,7 +59,7 @@ export class UserService {
             throw new ValidationError(error.message);
         }
 
-        const updatedUser = await this.userAccessService.updateByPK(userId, userDTO);
+        const updatedUser = await this.userDataAccess.updateUserById(userId, userDTO);
 
         if (!updatedUser) {
             throw new NotFoundError(`user with id ${userId} does not exist`);
@@ -72,12 +69,12 @@ export class UserService {
     }
 
     @PerformanceLogger(LoggerLevel.DEBUG)
-    public async getAutoSuggestUsers(subString: string, limit: number) {
+    public async getAutoSuggestUsers(subString: string, limit: number): Promise<WithId<UserDTO>[]> {
         if (subString == null || limit == null) {
             throw new ValidationError('subString and limit params must be specified');
         }
 
-        return this.userAccessService.getByField('login', subString, Number(limit));
+        return this.userDataAccess.getAutoSuggestUsers(subString, limit);
     }
 
     private generateUserInfo(user: UserDTO): WithId<UserDTO> {

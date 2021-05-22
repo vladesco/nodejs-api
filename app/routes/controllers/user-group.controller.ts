@@ -13,9 +13,9 @@ export class UserGroupControllerProvider {
     public provideController(): Router {
         const controller = Router();
 
-        controller.get('/users-group', this.getUsersWithGroups.bind(this));
-        controller.post('/users-group', this.addUsersToGroup.bind(this));
-        controller.get('/users-group/:id', this.getUserWithGroupsById.bind(this));
+        controller.get('/user-groups', this.getUsersWithGroups.bind(this));
+        controller.post('/user-groups', this.addUsersToGroup.bind(this));
+        controller.get('/user-groups/:id', this.getUserWithGroupsById.bind(this));
 
         return controller;
     }
@@ -23,7 +23,7 @@ export class UserGroupControllerProvider {
     @ErrorLogger(LoggerLevel.ERROR)
     private async getUserWithGroupsById(req: Request, res: Response) {
         const userId = req.params.id;
-        const userWithGroups = await this.userGroupService.getUserGroupsByPk(userId);
+        const userWithGroups = await this.userGroupService.getUserWithGroupsByPk(userId);
 
         res.json(userWithGroups);
     }
@@ -39,7 +39,7 @@ export class UserGroupControllerProvider {
     private async addUsersToGroup(req: Request, res: Response) {
         const usersGroupDTO: UsersGroupDTO = req.body;
 
-        const updatedUsers = await this.userGroupService.linkUsersAndGroup(usersGroupDTO);
+        const updatedUsers = await this.userGroupService.adaddUsersToGroup(usersGroupDTO);
 
         res.json(updatedUsers);
     }

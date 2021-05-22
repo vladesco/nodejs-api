@@ -1,6 +1,5 @@
+export const configToken = 'Config';
 export const loggerToken = 'Logger';
-export const userAccessServiceToken = 'UserAccessService';
-export const userGroupAccessServiceToken = 'UserGroupAccessService';
-export const groupAccessServiceToken = 'GroupAccessService';
-export const linkingUserAndGroupAccessServiceToken =
-    'LinkingUserAndGroupAccessService';
+export const userAccessObjectToken = 'UserAccessObject';
+export const groupAccessObjectToken = 'GroupAccessObject';
+export const userGroupAccessObjectToken = 'UserGroupAccessObject';
