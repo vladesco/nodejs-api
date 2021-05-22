@@ -1,10 +1,9 @@
 import { Op } from 'sequelize';
 import { BaseModel } from '../models';
-import { AnyObject, DataAccess, StaticMethods } from '../types';
+import { AnyObject, StaticMethods } from '../types';
+import { DataAccess } from './types';
 
-export class PostgreManyToMany<T extends AnyObject = {}>
-    implements DataAccess<T>
-{
+export class PostgreManyToMany<T extends AnyObject = {}> implements DataAccess<T> {
     constructor(
         private firstModel: StaticMethods<typeof BaseModel>,
         private secondModel: StaticMethods<typeof BaseModel>
@@ -49,26 +48,19 @@ export class PostgreManyToMany<T extends AnyObject = {}>
         const linkedEntities = createBody[this.secondModel.tableName];
 
         await Promise.all(
-            linkedEntities.map(async (linkedEntity: any) => {
+            linkedEntities.map(async (linkedEntity: object) => {
                 const secondEntity = await this.secondModel.findByPk(
                     this.secondModel.getPrimaryKeyValue(linkedEntity)
                 );
 
-                this.firstModel.addLinkedEntity(
-                    firstEntity,
-                    secondEntity,
-                    this.secondModel
-                );
+                this.firstModel.addLinkedEntity(firstEntity, secondEntity, this.secondModel);
             })
         );
 
         return firstEntity as T;
     }
 
-    public async updateByPK(
-        primaryKey: string,
-        updateBody: Partial<T>
-    ): Promise<T> {
+    public async updateByPK(primaryKey: string, updateBody: Partial<T>): Promise<T> {
         const updatedMainEntity = await this.firstModel.findByPk(primaryKey);
         await updatedMainEntity?.update(updateBody);
 
@@ -77,9 +69,7 @@ export class PostgreManyToMany<T extends AnyObject = {}>
             this.secondModel
         );
 
-        const updatedLinkedEntities = updateBody[
-            this.secondModel.tableName
-        ] as any[];
+        const updatedLinkedEntities = updateBody[this.secondModel.tableName] as any[];
 
         await Promise.all(
             linkedEntities.map(async (linkedEntity) => {
@@ -100,11 +90,7 @@ export class PostgreManyToMany<T extends AnyObject = {}>
         return updatedMainEntity as T;
     }
 
-    public getByField(
-        field: string,
-        substring: string,
-        limit: number
-    ): Promise<T[]> {
+    public getByField(field: string, substring: string, limit: number): Promise<T[]> {
         return this.firstModel.findAll({
             limit,
             where: {

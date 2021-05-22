@@ -1,6 +1,6 @@
 import Joi from 'joi';
-import { GroupWithPermissionsDTO } from '../types';
-import { ValidationSchema } from '../types';
+import { GroupWithPermissionsDTO } from '../models';
+import { ValidationSchema } from './types';
 
 const groupWithPermissionsDTOSchema: ValidationSchema<GroupWithPermissionsDTO> =
     {

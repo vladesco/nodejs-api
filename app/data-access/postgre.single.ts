@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import { BaseModel } from '../models';
-import { AnyObject, DataAccess, StaticMethods } from '../types';
+import { AnyObject, StaticMethods } from '../types';
+import { DataAccess } from './types';
 
 export class PostgreSingle<T extends AnyObject = {}> implements DataAccess<T> {
     constructor(private model: StaticMethods<typeof BaseModel>) {}

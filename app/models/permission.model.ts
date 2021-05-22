@@ -1,5 +1,5 @@
 import { DataTypes, Sequelize } from 'sequelize';
-import { Permission } from '../types';
+import { Permission } from './types';
 import { BaseModel } from './base.model';
 
 const permissionSchema = {

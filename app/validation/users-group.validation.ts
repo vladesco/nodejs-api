@@ -1,5 +1,6 @@
 import Joi from 'joi';
-import { UsersGroupDTO, ValidationSchema } from '../types';
+import { UsersGroupDTO } from '../models';
+import { ValidationSchema } from './types';
 
 const usersGroupDTOSchema: ValidationSchema<UsersGroupDTO> = {
     userIds: Joi.array()
