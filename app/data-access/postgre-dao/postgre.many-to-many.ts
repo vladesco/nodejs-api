@@ -1,4 +1,4 @@
-import { BaseModel, ManyToManyModel } from '../../models';
+import { ManyToManyModel } from '../../models';
 import { AnyObject, StaticMethods } from '../../types';
 import { ManyToManyDataAccess } from '../types';
 import { PostgreOneToMany } from './postgre.one-to-many';
@@ -18,7 +18,7 @@ export class PostgreManyToMany<T extends AnyObject = {}>
         const firstEntity = await this.firstModel.findByPk(firstEntityPk);
         const secondEntity = await this.secondModel.findByPk(secondEntityPk);
 
-        await this.linkEntity(firstEntity, secondEntity);
+        await this.firstModel.linkEntity(this.secondModel, firstEntity, secondEntity);
 
         return firstEntity;
     }
@@ -27,44 +27,8 @@ export class PostgreManyToMany<T extends AnyObject = {}>
         const firstEntity = await this.firstModel.findByPk(firstEntityPk);
         const secondEntity = await this.secondModel.findByPk(secondEntityPk);
 
-        await this.unlinkEntity(firstEntity, secondEntity);
+        await this.firstModel.unlinkEntity(this.secondModel, firstEntity, secondEntity);
 
         return firstEntity;
-    }
-
-    protected async linkEntityByBody(
-        firstEntity: BaseModel,
-        secondEntityBody: AnyObject
-    ): Promise<BaseModel> {
-        let secondEntity = await this.secondModel.findByPk(
-            this.secondModel.getPrimaryKeyValue(secondEntityBody)
-        );
-
-        if (!secondEntity) {
-            secondEntity = await this.secondModel.create(secondEntityBody);
-        }
-
-        return this.firstModel.linkEntities(this.secondModel, firstEntity, secondEntity);
-    }
-
-    protected async removeEntity(firstEntity: BaseModel, secondEntity: BaseModel): Promise<T> {
-        return this.unlinkEntities(
-            this.firstModel.getPrimaryKeyValue(firstEntity),
-            this.secondModel.getPrimaryKeyValue(secondEntity)
-        );
-    }
-
-    protected async linkEntity(
-        firstEntity: BaseModel,
-        secondEntity: BaseModel
-    ): Promise<BaseModel> {
-        return this.firstModel.linkEntities(this.secondModel, firstEntity, secondEntity);
-    }
-
-    protected async unlinkEntity(
-        firstEntity: BaseModel,
-        secondEntity: BaseModel
-    ): Promise<BaseModel> {
-        return this.firstModel.unlinkEntities(this.secondModel, firstEntity, secondEntity);
     }
 }

@@ -33,3 +33,13 @@ export class ForbiddenError extends BaseHttpError {
         return `[Forbidden]: ${this.message}`;
     }
 }
+
+export class AuthorizationError extends BaseHttpError {
+    get errorCode() {
+        return HttpStatusCode.UNAUTHORIZED;
+    }
+
+    public getMessage(): string {
+        return `[Authorization]: ${this.message}`;
+    }
+}

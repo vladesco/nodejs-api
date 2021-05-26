@@ -12,10 +12,7 @@ const groupSchema = {
     },
 };
 
-export class GroupModel extends ManyToManyModel<{ id: string; name: string }> {
-    public id!: number;
-    public name!: string;
-}
+export class GroupModel extends ManyToManyModel<typeof groupSchema> {}
 
 export const initializeGroupModel = (sequelize: Sequelize) => {
     GroupModel.init(groupSchema, {

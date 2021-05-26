@@ -1,13 +1,13 @@
-import { PostgreManyToMany } from '.';
 import { groupAccessObjectToken, Inject, Injectable } from '../di';
 import { GroupWithPermissionsDTO } from '../models';
 import { WithId } from '../types';
+import { ManyToManyDataAccess } from './types';
 
 @Injectable()
 export class GroupDataAccess {
     constructor(
         @Inject(groupAccessObjectToken)
-        private dataAccess: PostgreManyToMany<WithId<GroupWithPermissionsDTO>>
+        private dataAccess: ManyToManyDataAccess<WithId<GroupWithPermissionsDTO>>
     ) {}
 
     public async getGroups(): Promise<WithId<GroupWithPermissionsDTO>[]> {

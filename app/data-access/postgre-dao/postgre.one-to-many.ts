@@ -1,7 +1,12 @@
 import { Op } from 'sequelize';
 import { BaseModel, OneToManyModel } from '../../models';
 import { AnyObject, StaticMethods } from '../../types';
-import { transformFields } from '../../utils';
+import {
+    excludeItemsFromSet,
+    findIntersectionBetweenArrays,
+    invert,
+    transformFields,
+} from '../../utils';
 import { OneToManyDataAccess, SearchOptions } from '../types';
 
 export class PostgreOneToMany<T extends AnyObject = {}> implements OneToManyDataAccess<T> {
@@ -15,9 +20,6 @@ export class PostgreOneToMany<T extends AnyObject = {}> implements OneToManyData
             include: {
                 model: this.dependentModel,
                 as: this.dependentModel.tableName,
-                through: {
-                    attributes: [],
-                },
             },
         }) as Promise<T[]>;
     }
@@ -30,9 +32,6 @@ export class PostgreOneToMany<T extends AnyObject = {}> implements OneToManyData
             include: {
                 model: this.dependentModel,
                 as: this.dependentModel.tableName,
-                through: {
-                    attributes: [],
-                },
             },
         }) as Promise<T>;
     }
@@ -51,9 +50,6 @@ export class PostgreOneToMany<T extends AnyObject = {}> implements OneToManyData
             include: {
                 model: this.dependentModel,
                 as: this.dependentModel.tableName,
-                through: {
-                    attributes: [],
-                },
             },
         }) as Promise<T[]>;
     }
@@ -65,80 +61,66 @@ export class PostgreOneToMany<T extends AnyObject = {}> implements OneToManyData
         return mainEntity as T;
     }
 
-    public async create(createBody: T): Promise<T> {
-        const mainEntity = await this.mainModel.create(createBody);
-        const dependentEntitiesBody = createBody[this.dependentModel.tableName];
+    public async create(mainEntityBody: T): Promise<T> {
+        const mainEntity = await this.mainModel.create(mainEntityBody);
+        const dependentEntityBodies = mainEntityBody[this.dependentModel.tableName];
 
         await Promise.all(
-            dependentEntitiesBody.map((dependentEntityBody: AnyObject) =>
-                this.linkEntityByBody(mainEntity, dependentEntityBody)
+            dependentEntityBodies.map((dependentEntityBody: AnyObject) =>
+                this.mainModel.createEntityAndLink(
+                    this.dependentModel,
+                    mainEntity,
+                    dependentEntityBody
+                )
             )
         );
 
         return this.getByPK(this.mainModel.getPrimaryKeyValue(mainEntity));
     }
 
-    public async updateByPK(primaryKey: string, updateBody: Partial<T>): Promise<T> {
+    public async updateByPK(primaryKey: string, mainEntityBody: Partial<T>): Promise<T> {
         const mainEntity = await this.mainModel.findByPk(primaryKey);
-        await mainEntity?.update(updateBody);
+        await mainEntity?.update(mainEntityBody);
 
-        const dependentEntities = await this.getLinkedEntities(mainEntity);
-        const dependentEntitiesBody = updateBody[this.dependentModel.tableName] as any[];
-
-        const updatedDependentEntitiesPromises: Promise<BaseModel>[] = [];
-        const deletedDependentEntitiestiesPromises: Promise<void>[] = [];
-
-        dependentEntities.forEach((dependentEntity) => {
-            const body = dependentEntitiesBody.find(
-                (entityBody) =>
-                    this.dependentModel.getPrimaryKeyValue(entityBody) ===
-                    this.dependentModel.getPrimaryKeyValue(dependentEntity)
-            );
-            if (body) {
-                updatedDependentEntitiesPromises.push(dependentEntity.update(body));
-            } else {
-                deletedDependentEntitiestiesPromises.push(dependentEntity.destroy());
-            }
-        });
-
-        const createdDependentEntitiesPromises = dependentEntitiesBody
-            .filter((entityBody) =>
-                dependentEntities.find(
-                    (dependentEntity) =>
-                        this.dependentModel.getPrimaryKeyValue(entityBody) !==
-                        this.dependentModel.getPrimaryKeyValue(dependentEntity)
-                )
-            )
-            .map((entityBody) => this.linkEntityByBody(mainEntity, entityBody));
-
-        const awaitedPromises: Promise<BaseModel | void>[] = [
-            ...updatedDependentEntitiesPromises,
-            ...createdDependentEntitiesPromises,
-            ...deletedDependentEntitiestiesPromises,
-        ];
-
-        await Promise.all(awaitedPromises);
-
-        return mainEntity as T;
-    }
-
-    protected async linkEntityByBody(
-        mainEntity: BaseModel,
-        dependentEntityBody: AnyObject
-    ): Promise<BaseModel> {
-        return this.mainModel.createEntityandLink(
+        const dependentEntities = await this.mainModel.getLinkedEntities(
             this.dependentModel,
-            mainEntity,
-            dependentEntityBody
+            mainEntity
         );
-    }
+        const dependentEntityBodies = mainEntityBody[this.dependentModel.tableName] as any[];
 
-    protected async getLinkedEntities(mainEntity: BaseModel): Promise<BaseModel[]> {
-        return this.mainModel.getLinkedEntities(this.dependentModel, mainEntity);
-    }
+        const comparator = (firstElem: AnyObject, secondElem: AnyObject) =>
+            this.dependentModel.getPrimaryKeyValue(firstElem) ===
+            this.dependentModel.getPrimaryKeyValue(secondElem);
 
-    protected async removeEntity(mainEntity: BaseModel, dependentEntity: BaseModel): Promise<T> {
-        await dependentEntity.destroy();
+        const createDependentEntityPromises = excludeItemsFromSet(
+            dependentEntityBodies,
+            dependentEntities,
+            invert(comparator)
+        ).map((dependentEntityBody) =>
+            this.mainModel.createEntityAndLink(this.dependentModel, mainEntity, dependentEntityBody)
+        );
+
+        const deleteDependentEntityPromises = excludeItemsFromSet(
+            dependentEntities,
+            dependentEntityBodies,
+            invert(comparator)
+        ).map((dependentEntity) =>
+            this.mainModel.unlinkEntity(this.dependentModel, mainEntity, dependentEntity)
+        );
+
+        const updateDependentEntityPromises = findIntersectionBetweenArrays(
+            dependentEntities,
+            dependentEntityBodies,
+            comparator
+        ).map(([dependentEntity, dependentEntityBody]) =>
+            dependentEntity.update(dependentEntityBody)
+        );
+
+        await Promise.all<void | BaseModel>([
+            ...createDependentEntityPromises,
+            ...deleteDependentEntityPromises,
+            ...updateDependentEntityPromises,
+        ]);
 
         return this.getByPK(this.mainModel.getPrimaryKeyValue(mainEntity));
     }

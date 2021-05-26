@@ -16,7 +16,7 @@ export type UserDTO = {
     password: string;
 };
 
-export type userCredetialsDTO = {
+export type UserCredetialsDTO = {
     login: string;
     password: string;
 };
@@ -30,7 +30,11 @@ export type UserGroupDTO = {
     groupId: string;
 };
 
-export type UsersGroupDTO = {
+export type GroupWithUsersDTO = {
     userIds: string[];
     groupId: string;
+};
+
+export type UserAuthentifications = WithId<UserDTO> & {
+    authentifications: { userId: string; deviceId: string; refreshToken: string }[];
 };
