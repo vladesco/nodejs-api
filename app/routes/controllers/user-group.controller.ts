@@ -1,12 +1,12 @@
 import { Request, Response, Router } from 'express';
 import { UserGroupService } from '../../serivces';
-import { UsersGroupDTO } from '../../models';
+import { GroupWithUsersDTO } from '../../models';
 import { Injectable } from '../../di';
 import { ErrorLogger } from '../../decorators';
 import { LoggerLevel } from '../../logger';
 
 @Injectable()
-export class UserGroupControllerProvider {
+export class UserGroupController {
     constructor(private userGroupService: UserGroupService) {}
 
     @ErrorLogger(LoggerLevel.ERROR)
@@ -37,9 +37,9 @@ export class UserGroupControllerProvider {
 
     @ErrorLogger(LoggerLevel.ERROR)
     private async addUsersToGroup(req: Request, res: Response) {
-        const usersGroupDTO: UsersGroupDTO = req.body;
+        const GroupWithUsersDTO: GroupWithUsersDTO = req.body;
 
-        const updatedUsers = await this.userGroupService.adaddUsersToGroup(usersGroupDTO);
+        const updatedUsers = await this.userGroupService.adaddUsersToGroup(GroupWithUsersDTO);
 
         res.json(updatedUsers);
     }

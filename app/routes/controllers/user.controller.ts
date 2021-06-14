@@ -5,7 +5,7 @@ import { LoggerLevel } from '../../logger';
 import { UserService } from '../../serivces';
 
 @Injectable()
-export class UserControllerRrovider {
+export class UserController {
     constructor(private userService: UserService) {}
 
     public provideController(): Router {

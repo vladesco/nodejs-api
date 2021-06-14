@@ -3,8 +3,8 @@ import { PerformanceLogger } from '../decorators';
 import { Injectable } from '../di';
 import { ValidationError } from '../errors';
 import { LoggerLevel } from '../logger';
-import { UserWithGroupsDTO, UsersGroupDTO } from '../models';
-import { usersGroupDTOValidtor } from '../validation';
+import { UserWithGroupsDTO, GroupWithUsersDTO } from '../models';
+import { GroupWithUsersDTOValidtor } from '../validation';
 
 @Injectable()
 export class UserGroupService {
@@ -21,14 +21,16 @@ export class UserGroupService {
     }
 
     @PerformanceLogger(LoggerLevel.INFO)
-    public async adaddUsersToGroup(usersGroupDTO: UsersGroupDTO): Promise<UserWithGroupsDTO[]> {
-        const { error } = usersGroupDTOValidtor.validate(usersGroupDTO);
+    public async adaddUsersToGroup(
+        GroupWithUsersDTO: GroupWithUsersDTO
+    ): Promise<UserWithGroupsDTO[]> {
+        const { error } = GroupWithUsersDTOValidtor.validate(GroupWithUsersDTO);
 
         if (error) {
             throw new ValidationError(error.message);
         }
 
-        const { userIds, groupId } = usersGroupDTO;
+        const { userIds, groupId } = GroupWithUsersDTO;
 
         return this.userGroupAccessService.addUsersToGroup(userIds, groupId);
     }

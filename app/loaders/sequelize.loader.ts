@@ -2,6 +2,7 @@ import { Sequelize } from 'sequelize';
 import { Config } from '../config';
 import { configToken, container } from '../di';
 import {
+    initializeAuthentificationModel,
     initializeGroupModel,
     initializeGroupPermissionModel,
     initializePermissionModel,
@@ -27,4 +28,5 @@ export const setupSequelize = async () => {
     initializePermissionModel(sequelize);
     initializeGroupPermissionModel(sequelize);
     initializeUserGroupModel(sequelize);
+    initializeAuthentificationModel(sequelize);
 };

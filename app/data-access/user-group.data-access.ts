@@ -1,12 +1,12 @@
 import { Inject, Injectable, userGroupAccessObjectToken } from '../di';
 import { UserWithGroupsDTO } from '../models';
-import { PostgreManyToMany } from './postgre-dao';
+import { ManyToManyDataAccess } from './types';
 
 @Injectable()
 export class UserGroupDataService {
     constructor(
         @Inject(userGroupAccessObjectToken)
-        private dataAccess: PostgreManyToMany<UserWithGroupsDTO>
+        private dataAccess: ManyToManyDataAccess<UserWithGroupsDTO>
     ) {}
 
     public async getUserWithGroupsByPk(primaryKey: string): Promise<UserWithGroupsDTO> {

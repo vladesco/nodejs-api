@@ -1,6 +1,4 @@
 import { DataTypes, Sequelize } from 'sequelize';
-import { UserDTO } from '../types';
-import { WithId } from '../../types';
 import { ManyToManyModel } from './base.models';
 
 const userSchema = {
@@ -19,12 +17,7 @@ const userSchema = {
     },
 };
 
-export class UserModel extends ManyToManyModel<WithId<UserDTO>> {
-    public id!: string;
-    public login!: string;
-    public age!: number;
-    public password!: string;
-}
+export class UserModel extends ManyToManyModel<typeof userSchema> {}
 
 export const initializeUserModel = (sequelize: Sequelize) => {
     UserModel.init(userSchema, {

@@ -6,7 +6,7 @@ import { GroupWithPermissionsDTO } from '../../models';
 import { GroupService } from '../../serivces';
 
 @Injectable()
-export class GroupControllerRrovider {
+export class GroupController {
     constructor(private groupService: GroupService) {}
 
     @ErrorLogger(LoggerLevel.ERROR)

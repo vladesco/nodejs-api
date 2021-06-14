@@ -36,7 +36,7 @@ export class OneToManyModel<T extends AnyObject = {}> extends BaseModel<T> {
         return mainEntity[getLinkedEntitiesFunctionName]();
     }
 
-    public static createEntityandLink(
+    public static createEntityAndLink(
         dependentModel: typeof BaseModel,
         mainEntity: BaseModel & AnyObject,
         dependentEntityBody: AnyObject
@@ -46,10 +46,34 @@ export class OneToManyModel<T extends AnyObject = {}> extends BaseModel<T> {
 
         return mainEntity[setLinkedEntitiesFunctionName](dependentEntityBody);
     }
+
+    public static async unlinkEntity(
+        secondModel: typeof BaseModel,
+        firstEntity: BaseModel & AnyObject,
+        dependentEntity: BaseModel & AnyObject
+    ): Promise<void> {
+        return dependentEntity.destroy();
+    }
 }
 
 export class ManyToManyModel<T extends AnyObject = {}> extends OneToManyModel<T> {
-    public static async linkEntities(
+    public static async createEntityAndLink(
+        secondModel: typeof BaseModel,
+        firstEntity: BaseModel & AnyObject,
+        secondEntityBody: AnyObject
+    ): Promise<BaseModel> {
+        let secondEntity = await secondModel.findByPk(
+            secondModel.getPrimaryKeyValue(secondEntityBody)
+        );
+
+        if (!secondEntity) {
+            secondEntity = await secondModel.create(secondEntityBody);
+        }
+
+        return this.linkEntity(secondModel, firstEntity, secondEntity);
+    }
+
+    public static async linkEntity(
         secondModel: typeof BaseModel,
         firstEntity: BaseModel & AnyObject,
         secondEntity: BaseModel & AnyObject
@@ -60,11 +84,11 @@ export class ManyToManyModel<T extends AnyObject = {}> extends OneToManyModel<T>
         return firstEntity[addLinkedEntitiesFunctionName](secondEntity);
     }
 
-    public static async unlinkEntities(
+    public static async unlinkEntity(
         secondModel: typeof BaseModel,
         firstEntity: BaseModel & AnyObject,
         secondEntity: BaseModel & AnyObject
-    ): Promise<BaseModel> {
+    ): Promise<void> {
         const linkedModelName = secondModel.getModelName();
         const addLinkedEntitiesFunctionName = `remove${linkedModelName}`;
 
