@@ -38,7 +38,7 @@ export class GroupService {
     }
 
     @PerformanceLogger(LoggerLevel.DEBUG)
-    public async createGroup(
+    public async addGroup(
         groupDTO: GroupWithPermissionsDTO
     ): Promise<WithId<GroupWithPermissionsDTO>> {
         const { error } = groupWithPermissionsDTOValidtor.validate(groupDTO);
@@ -49,7 +49,7 @@ export class GroupService {
 
         const groupInfo = this.generateGroupInfo(groupDTO);
 
-        return this.groupAccessService.createGroup(groupInfo);
+        return this.groupAccessService.addGroup(groupInfo);
     }
 
     @PerformanceLogger(LoggerLevel.DEBUG)

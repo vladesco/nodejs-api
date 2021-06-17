@@ -22,7 +22,7 @@ export class GroupDataAccess {
         return this.dataAccess.deleteByPK(groupId);
     }
 
-    public async createGroup(
+    public async addGroup(
         group: WithId<GroupWithPermissionsDTO>
     ): Promise<WithId<GroupWithPermissionsDTO>> {
         return this.dataAccess.create(group);

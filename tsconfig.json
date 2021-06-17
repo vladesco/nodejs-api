@@ -9,6 +9,6 @@
         "emitDecoratorMetadata": true,
         "noUnusedLocals": true,
         "esModuleInterop": true,
-        "types": ["sequelize/types", "./app/types/global.d.ts"]
+        "types": ["sequelize/types", "./app/types/global.d.ts", "mocha"]
     }
 }
