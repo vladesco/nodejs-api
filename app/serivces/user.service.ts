@@ -42,7 +42,7 @@ export class UserService {
     }
 
     @PerformanceLogger(LoggerLevel.DEBUG)
-    public async deletedUserById(userId: string): Promise<WithId<UserDTO>> {
+    public async deleteUserById(userId: string): Promise<WithId<UserDTO>> {
         const deletedUser = await this.userDataAccess.deletedUserById(userId);
 
         if (!deletedUser) {

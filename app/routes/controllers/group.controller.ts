@@ -31,7 +31,7 @@ export class GroupController {
     @ErrorLogger(LoggerLevel.ERROR)
     private async addGroup(req: Request, res: Response) {
         const groupDTO: GroupWithPermissionsDTO = req.body;
-        const group = await this.groupService.createGroup(groupDTO);
+        const group = await this.groupService.addGroup(groupDTO);
         res.json(group);
     }
 

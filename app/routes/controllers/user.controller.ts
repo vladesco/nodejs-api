@@ -53,7 +53,7 @@ export class UserController {
     @ErrorLogger(LoggerLevel.ERROR)
     private async deleteUserById(req: Request, res: Response) {
         const userId = req.params.id;
-        const findedUser = await this.userService.deletedUserById(userId);
+        const findedUser = await this.userService.deleteUserById(userId);
         res.json(findedUser);
     }
 
